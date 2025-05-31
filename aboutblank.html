@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IM GAMES</title>
+  <style>
+    :root {
+      --bg: #0f111a;
+      --accent: #00c2ff;
+      --card: #1e222f;
+      --hover: #293043;
+      --text: #f1f1f1;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    nav button {
+      padding: 10px 16px;
+      background-color: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    nav button:hover {
+      transform: scale(1.05);
+    }
+    #searchBar {
+      padding: 12px;
+      width: 300px;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: none;
+      margin: 20px 0;
+      background-color: var(--card);
+      color: var(--text);
+      box-shadow: 0 0 6px var(--accent);
+    }
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 1200px;
+    }
+    .game-card {
+      background: var(--hover);
+      padding: 14px;
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .game-card:hover {
+      background-color: var(--accent);
+      color: #000;
+      transform: scale(1.03);
+    }
+    iframe {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      z-index: 10;
+    }
+    #backBtn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 20;
+      padding: 10px 20px;
+      font-weight: bold;
+      background: var(--accent);
+      color: #000;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: none;
+      box-shadow: 0 0 10px var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <h1>IM GAMES</h1>
+  <nav id="categoryNav"></nav>
+  <input type="text" id="searchBar" placeholder="Search games..." oninput="filterGames()">
+  <div id="gameSection">
+    <div id="gameContainer" class="game-grid"></div>
+  </div>
+  <button id="backBtn" onclick="goBack()">Back</button>
+  <iframe id="gameFrame" style="display:none;"></iframe>
+
+  <script>
+    const categories = {
+      Arcade: ["https://play2048.co", "https://tetris.com/play-tetris", "https://slopegame.io", "https://hextris.io", "https://flappybird.io", "https://retro-bowl.io", "https://doodlejump.io", "https://templerun.io", "https://run3.io", "https://subwaysurf.io", "https://geometrydash.io", "https://ballsort.io", "https://bloxorz.io", "https://tunnelrush.io", "https://stack.io", "https://pacman.live", "https://clickerheroes.com", "https://basketballstars.io", "https://moto-x3m.io", "https://slopeball.io", "https://helixjump.io", "https://rollyvortex.io", "https://mergefruit.io", "https://zigzag.io", "https://driftboss.io", "https://fitin3d.io", "https://swingmonkey.io", "https://jumpandrun.io", "https://paperio3d.io", "https://powerline.io", "https://aquapark.io", "https://maze.io", "https://catfall.io", "https://bombit.io", "https://madalin-cars-multiplayer.com", "https://flippyknife.io", "https://tap-tap-shots.io", "https://knight.io", "https://tankroyale.io", "https://archery.io", "https://basketbros.io", "https://stickmerge.io", "https://runrich.io", "https://jumpdudes.io", "https://idlebreakout.io", "https://stickwar.io", "https://pixeljump.io", "https://mazecontrol.io", "https://carfight.io", "https://hookedinc.io"],
+      Puzzle: ["https://sudoku.com", "https://minesweeper.online", "https://cuttherope.net", "https://fireboyandwatergirl.com", "https://jellytruck.com", "https://2048.io", "https://sokoban.io", "https://unblockme.io", "https://brainout.io", "https://logicmaster.io", "https://snailbob.net", "https://isogravity.io", "https://blockudoku.com", "https://riddletransfer.io", "https://smartgames.io", "https://gravitymaze.io", "https://pipeconnect.io", "https://matchtiles.io", "https://theimpossiblequiz.io", "https://tenkyu.io", "https://puzzlegame.io", "https://one-line.io", "https://connectdots.io", "https://flipandslide.io", "https://drawtheline.io", "https://bounceball.io", "https://elevatetrivia.io", "https://boxed.io", "https://lighton.io", "https://2048cupcakes.com", "https://mathgames.com", "https://cubesorting.io", "https://thinkoutside.io", "https://stackblocks.io", "https://slidepuzzle.io", "https://brainstorm.io", "https://tiles.io", "https://braintraining.io", "https://colorfill.io", "https://laserpipes.io", "https://matcharena.io", "https://candyconnect.io", "https://superhex.io", "https://gridblock.io", "https://2048dogs.com", "https://linkpuzzle.io", "https://matchemoji.io", "https://braintease.io", "https://match3.io"],
+      Multiplayer: ["https://slither.io", "https://krunker.io", "https://agar.io", "https://diep.io", "https://zombs.io", "https://shellshock.io", "https://bonk.io", "https://smashkarts.io", "https://paper-io.com", "https://hole.io", "https://snowball.io", "https://raftwars.io", "https://amongusplay.online", "https://stickfight.io", "https://wilds.io", "https://gunmayhem.io", "https://brutal.io", "https://racerz.io", "https://drawaria.online", "https://swordz.io", "https://voxiom.io", "https://evowars.io", "https://splix.io", "https://ninja.io", "https://airwars2.io", "https://combatarms.io", "https://getawayshootout.com", "https://basketballlegends.io", "https://tagpro.gg", "https://battleboats.io", "https://territorial.io", "https://warbrokers.io", "https://murder.io", "https://jumpfall.io", "https://deadshot.io", "https://minigiants.io", "https://gats.io", "https://tankwars.io", "https://rocketbotroyale.io", "https://merc.zone", "https://superhex.io", "https://takepoint.io", "https://spinz.io", "https://blocktanks.io", "https://pixelwars.io", "https://narwhale.io", "https://blastarena.io", "https://flaap.io", "https://voxelwars.io", "https://skribbl.io"],
+      Action: ["https://templerun.io", "https://run3.io", "https://supermariobros.io", "https://smashkarts.io", "https://stickmanhook.io", "https://stickmanfighter.io", "https://vex7.io", "https://jetpackjoyride.io", "https://rungame.io", "https://galaxyrun.io", "https://bobtherobber.io", "https://zombierun.io", "https://gunmayhem.io", "https://crazyrun.io", "https://lonewolf.io", "https://jumpingjoe.io", "https://blazebattle.io", "https://shooterz.io", "https://trapadventure.io", "https://climbup.io", "https://deathrun.io", "https://fallboys.io", "https://spidermanhook.io", "https://catninjarun.io", "https://drawfighters.io", "https://marioescape.io", "https://hyperrunner.io", "https://sharkattack.io", "https://jumpescape.io", "https://firevsice.io", "https://hoverboard.io", "https://ninjarun.io", "https://robotadventure.io", "https://fruitadventure.io", "https://rocketrush.io", "https://agentplatform.io", "https://rollerjump.io", "https://runner.io", "https://jumpbro.io", "https://masked.io", "https://mazejump.io", "https://speedrun.io", "https://supermech.io", "https://ninjawarrior.io", "https://kungfurun.io", "https://manjump.io", "https://rooftoprun.io", "https://rescuehero.io", "https://streetfighting.io", "https://trapandrun.io"],
+      Casual: ["https://doodlecricket.github.io", "https://elasticman.io", "https://bitlifeonline.com", "https://gunspin.io", "https://fruitninja.io", "https://cat-bounce.com", "https://weavesilk.com", "https://theuselessweb.com", "https://neonflappy.io", "https://bubble-shooter.io", "https://virtualpiano.net", "https://solitaired.com", "https://classic.minecraft.net", "https://radio.garden", "https://retrogames.cc", "https://snake.googlemaps.com", "https://pointerpointer.com", "https://thisissand.com", "https://pianoempire.io", "https://bubbleshooterclassic.com", "https://quickdraw.withgoogle.com", "https://drumkit.io", "https://spacehey.com", "https://heyyyyy.com", "https://jsgames.dev", "https://webamp.org", "https://scribbl.io", "https://happyglass.io", "https://popcat.click", "https://neonlines.io", "https://idlemines.io", "https://incrementalclicker.io", "https://dino.game", "https://pixelforge.io", "https://fakespot.io", "https://hackertyper.net", "https://notes.io", "https://typingclub.com", "https://10fastfingers.com", "https://quickmaths.io", "https://gravitysimulator.io", "https://magnetgame.io", "https://sandboxels.r74n.com", "https://clickspeedtest.info", "https://notpron.org", "https://longdogechallenge.com", "https://weirdorconfusing.com", "https://puginarug.com", "https://dadjokes.io", "https://heeeeeeeey.com"]
+    };
+
+    const gameTitles = {};
+    Object.entries(categories).forEach(([group, urls]) => {
+      urls.forEach(url => {
+        const name = url.replace(/^https?:\/\//, '').replace('www.', '').split(/[./?#]/)[0];
+        gameTitles[url] = name.charAt(0).toUpperCase() + name.slice(1);
+      });
+    });
+
+    let currentCategory = Object.keys(categories)[0];
+
+    function createNavigation() {
+      const nav = document.getElementById("categoryNav");
+      nav.innerHTML = "";
+      for (const category of Object.keys(categories)) {
+        const btn = document.createElement("button");
+        btn.textContent = category;
+        btn.onclick = () => {
+          currentCategory = category;
+          renderGames();
+        };
+        nav.appendChild(btn);
+      }
+    }
+
+    function renderGames() {
+      const container = document.getElementById("gameContainer");
+      container.innerHTML = "";
+      categories[currentCategory].forEach(url => {
+        const card = document.createElement("div");
+        card.className = "game-card";
+        card.textContent = gameTitles[url] || url;
+        card.onclick = () => loadGame(url);
+        container.appendChild(card);
+      });
+    }
+
+    function filterGames() {
+      const input = document.getElementById("searchBar").value.toLowerCase();
+      const cards = document.querySelectorAll(".game-card");
+      cards.forEach(card => {
+        card.style.display = card.textContent.toLowerCase().includes(input) ? "block" : "none";
+      });
+    }
+
+    // Modified function: hides everything except the game and back button
+    function loadGame(url) {
+      const iframe = document.getElementById("gameFrame");
+      iframe.src = url;
+      iframe.style.display = "block";
+
+      document.getElementById("gameSection").style.display = "none";
+      document.getElementById("categoryNav").style.display = "none";
+      document.getElementById("searchBar").style.display = "none";
+      document.querySelector("h1").style.display = "none";
+      document.getElementById("backBtn").style.display = "block";
+    }
+
+    // Modified function: restores everything
+    function goBack() {
+      const iframe = document.getElementById("gameFrame");
+      iframe.src = "";
+      iframe.style.display = "none";
+
+      document.getElementById("gameSection").style.display = "block";
+      document.getElementById("categoryNav").style.display = "flex";
+      document.getElementById("searchBar").style.display = "block";
+      document.querySelector("h1").style.display = "block";
+      document.getElementById("backBtn").style.display = "none";
+    }
+
+    window.onload = () => {
+      createNavigation();
+      renderGames();
+    };
+  </script>
+</body>
+</html>
